@@ -1,0 +1,29 @@
+---
+import MainGridLayout from "../layouts/MainGridLayout.astro";
+import Hero from "../components/Hero.astro";
+import { getSortedPosts } from "../utils/content-utils";
+import PostCard from "../components/PostCard.astro";
+
+const allBlogPosts = await getSortedPosts();
+const recentPosts = allBlogPosts.slice(0, 3); // Show top 3 recent posts
+---
+
+<MainGridLayout>
+    <Hero />
+    
+    <div class="flex flex-col gap-4 mb-4">
+        <h2 class="text-2xl font-bold text-black/75 dark:text-white/75 ml-2">Recent Activity</h2>
+    </div>
+
+    <!-- Recent Posts Logic - Reusing PostCard if available or creating a simple list -->
+    <div class="grid grid-cols-1 md:grid-cols-1 gap-4 transition-fade">
+        {recentPosts.map((entry) => (
+             <PostCard entry={entry} title={entry.data.title} tags={entry.data.tags} category={entry.data.category} published={entry.data.published} url={entry.slug} image={entry.data.image} description={entry.data.description} draft={entry.data.draft} class="onload-animation" style={`animation-delay: calc(var(--content-delay) + 50ms)`}></PostCard>
+        ))}
+    </div>
+    
+    <div class="flex justify-center mt-8">
+        <a href="/projects/" class="btn-regular px-6 py-3 rounded-xl font-medium">View All Projects</a>
+    </div>
+
+</MainGridLayout>

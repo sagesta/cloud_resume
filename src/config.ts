@@ -12,8 +12,8 @@ export const siteConfig: SiteConfig = {
 	subtitle: "Cloud & DevOps Engineer",
 	lang: "en", // Language code, e.g. 'en', 'zh_CN', 'ja', etc.
 	themeColor: {
-		hue: 250, // Default hue for the theme color, from 0 to 360. e.g. red: 0, teal: 200, cyan: 250, pink: 345
-		fixed: false, // Hide the theme color picker for visitors
+		hue: 260, // Default hue for the theme color, from 0 to 360. e.g. red: 0, teal: 200, cyan: 250, pink: 345
+		fixed: true, // Hide the theme color picker for visitors
 	},
 	banner: {
 		enable: false,
@@ -45,15 +45,19 @@ export const navBarConfig: NavBarConfig = {
 		LinkPreset.About,
 		{
 			name: "Skills",
-			url: "/about#skills",
+			url: "/skills/",
 		},
 		{
 			name: "Experience",
-			url: "/about#experience",
+			url: "/experience/",
 		},
 		{
 			name: "Projects",
-			url: "/archive",
+			url: "/projects/",
+		},
+		{
+			name: "Blog",
+			url: "/posts/",
 		},
 		{
 			name: "GitHub",
@@ -77,6 +81,11 @@ export const profileConfig: ProfileConfig = {
 			name: "GitHub",
 			icon: "fa6-brands:github",
 			url: "https://github.com/sagesta",
+		},
+		{
+			name: "Mail",
+			icon: "fa6-solid:envelope",
+			url: "mailto:staprime93@gmail.com",
 		},
 	],
 };
