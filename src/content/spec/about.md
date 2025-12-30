@@ -1,9 +1,33 @@
-# About
-This is the demo site for [Fuwari](https://github.com/saicaca/fuwari).
+---
+title: "About Me"
+description: "Professional background and skills of Samuel Adebodun"
+---
 
-::github{repo="saicaca/fuwari"}
+# Hello! I'm Samuel Adebodun
 
-> ### Sources of images used in this site
-> - [Unsplash](https://unsplash.com/)
-> - [星と少女](https://www.pixiv.net/artworks/108916539) by [Stella](https://www.pixiv.net/users/93273965)
-> - [Rabbit - v1.4 Showcase](https://civitai.com/posts/586908) by [Rabbit_YourMajesty](https://civitai.com/user/Rabbit_YourMajesty)
+I am a passionate **Cloud & DevOps Engineer** specializing in **Cloud engineering, DevOps Automation, and Technical support**.
+
+## Skills
+
+- **Cloud Platforms**: AWS, Azure
+- **Infrastructure as Code**: Terraform, CloudFormation
+- **CI/CD**: GitHub Actions, Jenkins, Azure DevOps
+- **Containerization & Orchestration**: Docker, Kubernetes
+- **Scripting**: Python, Bash, PowerShell, Go
+- **Monitoring & Logging**: Prometheus, Grafana, ELK Stack
+
+## Certificates
+- Azure DevOps Engineer
+- Azure Solutions Architect
+- Azure Administrator
+- KCNA
+
+## Experience
+
+### [Job Title] at [Company Name]
+*[Date Range]*
+- Brief description of your responsibilities and achievements.
+
+## Projects
+
+Check out my [projects](/archive) to see what I've been building.
