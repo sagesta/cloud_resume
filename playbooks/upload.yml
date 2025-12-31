@@ -5,7 +5,7 @@
   gather_facts: false
 
   vars:
-    resource_group_name: "portfo"
+    resource_group_name: "portfo-v2"
     location: "eastus"
     storage_account_name: "storagesamueladebodun"
     
