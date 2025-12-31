@@ -6,7 +6,7 @@
 
   vars:
     resource_group_name: "portfo"
-    location: "eastus"
+    location: "eastus2"
     storage_account_name: "storagesamueladebodun"
     # Points to main.bicep in the project root (one level up from playbooks/)
     bicep_file: "{{ playbook_dir }}/../main.bicep"

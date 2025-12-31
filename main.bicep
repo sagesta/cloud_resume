@@ -146,7 +146,7 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
         }
         {
           name: 'CosmosDbConnection'
-          value: listConnectionStrings(cosmosAccount.id, '2023-11-15').connectionStrings[0].connectionString
+          value: cosmosAccount.listConnectionStrings().connectionStrings[0].connectionString
         }
       ]
       cors: {
