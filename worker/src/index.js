@@ -2,6 +2,18 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
 
+    // Handle debug route
+    if (url.pathname === "/api/debug") {
+      return new Response(JSON.stringify({
+        AZURE_STORAGE_URL: env.AZURE_STORAGE_URL,
+        AZURE_FUNCTION_URL: env.AZURE_FUNCTION_URL,
+        TargetHostname: new URL(env.AZURE_STORAGE_URL).hostname,
+        Message: "If you see this, the Worker is running and variables are loaded."
+      }, null, 2), {
+        headers: { "Content-Type": "application/json" }
+      });
+    }
+
     // Handle API requests for visitor count
     if (url.pathname === "/api/visitorCount") {
       const AZURE_FUNC_URL = env.AZURE_FUNCTION_URL;
