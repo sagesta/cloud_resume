@@ -25,6 +25,8 @@
 
     - name: Show Deployment Output
       ansible.builtin.debug:
-        msg: "{{ (cli_output.stdout | from_json).properties.outputs | default('No outputs') }}"
+        msg: 
+          - "Deployment Outputs:"
+          - "{{ (cli_output.stdout | from_json).properties.outputs | default('No outputs') }}"
       # Only runs if the previous command returned valid JSON
       when: cli_output.stdout | length > 0
