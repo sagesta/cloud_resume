@@ -1,0 +1,11 @@
+#!/bin/bash
+PROJECT_ROOT=$(dirname "$0")/..
+cd "$PROJECT_ROOT"
+
+# Ensure Azure CLI is logged in or available
+if ! command -v az &> /dev/null; then
+    echo "Azure CLI (az) could not be found. Please install it."
+    exit 1
+fi
+
+ansible-playbook playbooks/deploy_function.yml

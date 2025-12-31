@@ -1,0 +1,62 @@
+name: Deploy to Azure & Cloudflare
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ZONE_ID: ${{ vars.CLOUDFLARE_ZONE_ID }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Node Dependencies
+        run: |
+          npm ci
+          cd worker && npm ci
+
+      - name: Build Astro Project
+        run: npm run build
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Setup Ansible & Tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y zip
+          pip install ansible azure-cli
+
+      - name: Deploy Infrastructure (Bicep)
+        run: ansible-playbook playbooks/deploy.yml
+
+      - name: Deploy Azure Function
+        run: ansible-playbook playbooks/deploy_function.yml
+
+      - name: Upload to Blob Storage & Purge Cache
+        run: |
+          chmod +x bin/upload
+          ./bin/upload
+
+      - name: Deploy Cloudflare Worker
+        run: |
+          cd worker
+          npx wrangler deploy

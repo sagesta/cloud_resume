@@ -1,0 +1,51 @@
+---
+- name: Deploy Azure Function Code
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars:
+    resource_group_name: "portfo"
+    project_root: "{{ playbook_dir }}/.."
+    api_dir: "{{ project_root }}/api"
+    zip_file: "{{ project_root }}/api.zip"
+
+  tasks:
+    - name: Get Function App Name
+      ansible.builtin.shell:
+        cmd: az functionapp list --resource-group {{ resource_group_name }} --query "[0].name" -o tsv
+      register: func_app_query
+      changed_when: false
+
+    - name: Fail if no Function App found
+      ansible.builtin.fail:
+        msg: "No Function App found in resource group {{ resource_group_name }}"
+      when: func_app_query.stdout == ""
+
+    - name: Install zip utility (if missing)
+      ansible.builtin.package:
+        name: zip
+        state: present
+      ignore_errors: true # In case we are on Windows without package manager access or permission
+
+    - name: Zip API directory
+      ansible.builtin.shell:
+        cmd: "cd {{ api_dir }} && zip -r {{ zip_file }} ."
+        # using shell zip ensures structure is correct (content at root of zip)
+      register: zip_result
+      changed_when: true
+
+    - name: Deploy to Azure Function
+      ansible.builtin.command:
+        cmd: >
+          az functionapp deployment source config-zip
+          --resource-group {{ resource_group_name }}
+          --name {{ func_app_query.stdout }}
+          --src {{ zip_file }}
+      register: deploy_result
+      changed_when: "'Active' in deploy_result.stdout or 'Succeeded' in deploy_result.stdout"
+
+    - name: Clean up zip file
+      ansible.builtin.file:
+        path: "{{ zip_file }}"
+        state: absent
