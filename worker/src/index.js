@@ -49,6 +49,9 @@ export default {
       redirect: "manual"
     });
 
+    // Force Host header to match the origin
+    newRequest.headers.set("Host", targetUrl.hostname);
+
     try {
       const response = await fetch(newRequest);
       return response;
