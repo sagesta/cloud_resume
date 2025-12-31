@@ -82,6 +82,26 @@ The "Visitors" counter in the navbar requires a backend API.
 3.  **Deployment**:
     - If deploying via GitHub Actions to Azure Static Web Apps, add `PUBLIC_VISITOR_API_URL` as a repository secret.
 
+### Infrastructure Deployment
+
+The project includes Infrastructure as Code (IaC) using Bicep and Ansible to provision Azure resources (Storage Account).
+
+1.  **Install Python Dependencies**:
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+2.  **Install Ansible Galaxy Collection**:
+    ```bash
+    ansible-galaxy collection install azure.azcollection
+    ```
+
+3.  **Run Deployment Script**:
+    ```bash
+    ./bin/deploy
+    ```
+    This script will compile the Bicep template and deploy the Storage Account to the configured Azure resource group.
+
 ## 📂 Project Structure
 
 ```

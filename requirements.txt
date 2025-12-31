@@ -9,3 +9,9 @@ pycparser==2.23
 PyYAML==6.0.3
 resolvelib==1.0.1
 typing_extensions==4.15.0
+requests>=2.31.0
+azure-cli>=2.61.0
+azure-identity>=1.16.0
+azure-mgmt-resource>=23.1.0
+azure-mgmt-storage>=21.1.0
+msrestazure>=0.6.4

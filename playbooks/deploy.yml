@@ -3,13 +3,13 @@
   hosts: localhost
   connection: local
   gather_facts: false
-    - azure.collection
+  collections:
+    - azure.azcollection
 
   vars:
     resource_group_name: "portfo"
     location: "eastus"
     storage_account_name: "storage_samueladebodun"
-    vars:
     bicep_file: "{{ playbook_dir }}/../main.bicep" 
     json_template_file: "{{ playbook_dir }}/../main.json" 
 
