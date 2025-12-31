@@ -34,6 +34,15 @@ param frontDoorProfileName string = 'fd-${uniqueString(resourceGroup().id)}'
 @description('The name of the Front Door endpoint')
 param frontDoorEndpointName string = 'fde-${uniqueString(resourceGroup().id)}'
 
+@description('The name of the DNS zone')
+param dnsZoneName string = 'samueladebodun.com'
+
+@description('The subdomain to use (e.g. www)')
+param subDomain string = 'www'
+
+var fullCustomDomainName = '${subDomain}.${dnsZoneName}'
+var customDomainResourceName = replace(fullCustomDomainName, '.', '-')
+
 resource frontDoorProfile 'Microsoft.Cdn/profiles@2021-06-01' = {
   name: frontDoorProfileName
   location: 'global'
@@ -81,10 +90,31 @@ resource frontDoorOrigin 'Microsoft.Cdn/profiles/originGroups/origins@2021-06-01
   }
 }
 
+// Custom Domain Resource on Front Door
+resource frontDoorCustomDomain 'Microsoft.Cdn/profiles/customDomains@2021-06-01' = {
+  parent: frontDoorProfile
+  name: customDomainResourceName
+  properties: {
+    hostName: fullCustomDomainName
+    tlsSettings: {
+      certificateType: 'ManagedCertificate'
+      minimumTlsVersion: 'TLS12'
+    }
+  }
+}
+
 resource frontDoorRoute 'Microsoft.Cdn/profiles/afdEndpoints/routes@2021-06-01' = {
   parent: frontDoorEndpoint
   name: 'default-route'
+  dependsOn: [
+    frontDoorOrigin
+  ]
   properties: {
+    customDomains: [
+      {
+        id: frontDoorCustomDomain.id
+      }
+    ]
     originGroup: {
       id: frontDoorOriginGroup.id
     }
@@ -101,5 +131,44 @@ resource frontDoorRoute 'Microsoft.Cdn/profiles/afdEndpoints/routes@2021-06-01' 
   }
 }
 
+// --- Azure DNS Automation ---
+
+resource dnsZone 'Microsoft.Network/dnsZones@2018-05-01' existing = {
+  name: dnsZoneName
+}
+
+// TXT Record for Validation (_dnsauth.subdomain)
+resource dnsTxtRecord 'Microsoft.Network/dnsZones/TXT@2018-05-01' = {
+  parent: dnsZone
+  name: '_dnsauth.${subDomain}'
+  properties: {
+    TTL: 3600
+    TXTRecords: [
+      {
+        value: [
+          frontDoorCustomDomain.properties.validationProperties.validationToken
+        ]
+      }
+    ]
+  }
+}
+
+// CNAME Record (www -> Front Door Endpoint)
+resource dnsCnameRecord 'Microsoft.Network/dnsZones/CNAME@2018-05-01' = {
+  parent: dnsZone
+  name: subDomain
+  dependsOn: [
+    frontDoorRoute // Ensure route is ready
+    dnsTxtRecord   // Ensure validation record exists
+  ]
+  properties: {
+    TTL: 3600
+    CNAMERecord: {
+      cname: frontDoorEndpoint.properties.hostName
+    }
+  }
+}
+
 output frontDoorEndpointHostName string = frontDoorEndpoint.properties.hostName
+output customDomainName string = fullCustomDomainName
 

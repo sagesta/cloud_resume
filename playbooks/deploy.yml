@@ -8,10 +8,18 @@
     resource_group_name: "portfo"
     location: "eastus"
     storage_account_name: "storagesamueladebodun"
+    dns_zone: "samueladebodun.com"
+    sub_domain: "www"
     # Points to main.bicep in the project root (one level up from playbooks/)
     bicep_file: "{{ playbook_dir }}/../main.bicep"
 
   tasks:
+    - name: Create Resource Group
+      ansible.builtin.command:
+        cmd: az group create --name {{ resource_group_name }} --location {{ location }}
+      register: rg_create
+      changed_when: "'Succeeded' in rg_create.stdout"
+
     - name: Deploy Infrastructure (Bypass Python Module)
       ansible.builtin.command:
         cmd: >
@@ -19,7 +27,7 @@
           --resource-group {{ resource_group_name }}
           --name "ansible-bicep-deploy"
           --template-file {{ bicep_file }}
-          --parameters storageAccountName={{ storage_account_name }} location={{ location }}
+          --parameters storageAccountName={{ storage_account_name }} location={{ location }} dnsZoneName={{ dns_zone }} subDomain={{ sub_domain }}
       register: cli_output
       changed_when: "'Running' in cli_output.stderr or 'Succeeded' in cli_output.stdout"
 
