@@ -42,3 +42,17 @@
       register: upload_result
       changed_when: upload_result.stdout != ""
 
+    - name: Purge Cloudflare Cache
+      ansible.builtin.uri:
+        url: "https://api.cloudflare.com/client/v4/zones/{{ lookup('env', 'CLOUDFLARE_ZONE_ID') }}/purge_cache"
+        method: POST
+        headers:
+          Authorization: "Bearer {{ lookup('env', 'CLOUDFLARE_API_TOKEN') }}"
+          Content-Type: "application/json"
+        body_format: json
+        body:
+          purge_everything: true
+        status_code: 200
+      register: cf_purge
+      when: upload_result.changed
+
