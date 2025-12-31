@@ -103,6 +103,57 @@ resource frontDoorCustomDomain 'Microsoft.Cdn/profiles/customDomains@2021-06-01'
   }
 }
 
+// --- Apex Domain Configuration (@) ---
+
+var apexCustomDomainName = dnsZoneName
+var apexCustomDomainResourceName = replace(apexCustomDomainName, '.', '-')
+
+resource apexCustomDomain 'Microsoft.Cdn/profiles/customDomains@2021-06-01' = {
+  parent: frontDoorProfile
+  name: apexCustomDomainResourceName
+  properties: {
+    hostName: apexCustomDomainName
+    tlsSettings: {
+      certificateType: 'ManagedCertificate'
+      minimumTlsVersion: 'TLS12'
+    }
+  }
+}
+
+// Redirect Rule: Apex -> WWW
+resource redirectRuleSet 'Microsoft.Cdn/profiles/ruleSets@2021-06-01' = {
+  parent: frontDoorProfile
+  name: 'RedirectToWWW'
+}
+
+resource redirectRule 'Microsoft.Cdn/profiles/ruleSets/rules@2021-06-01' = {
+  parent: redirectRuleSet
+  name: 'RedirectApexToWWW'
+  properties: {
+    order: 1
+    actions: [
+      {
+        name: 'UrlRedirect'
+        parameters: {
+          typeName: 'DeliveryRuleUrlRedirectActionParameters'
+          redirectType: 'Moved'
+          destinationProtocol: 'Https'
+          customHostname: fullCustomDomainName // Redirect to www
+        }
+      }
+    ]
+    conditions: [
+      {
+         name: 'RequestUrl'
+         parameters: {
+           typeName: 'DeliveryRuleRequestUrlConditionParameters'
+           operator: 'Any'
+         }
+      }
+    ]
+  }
+}
+
 resource frontDoorRoute 'Microsoft.Cdn/profiles/afdEndpoints/routes@2021-06-01' = {
   parent: frontDoorEndpoint
   name: 'default-route'
@@ -114,10 +165,18 @@ resource frontDoorRoute 'Microsoft.Cdn/profiles/afdEndpoints/routes@2021-06-01' 
       {
         id: frontDoorCustomDomain.id
       }
+      {
+        id: apexCustomDomain.id
+      }
     ]
     originGroup: {
       id: frontDoorOriginGroup.id
     }
+    ruleSets: [
+      {
+        id: redirectRuleSet.id
+      }
+    ]
     supportedProtocols: [
       'Http'
       'Https'
@@ -137,7 +196,7 @@ resource dnsZone 'Microsoft.Network/dnsZones@2018-05-01' existing = {
   name: dnsZoneName
 }
 
-// TXT Record for Validation (_dnsauth.subdomain)
+// 1. WWW Validation
 resource dnsTxtRecord 'Microsoft.Network/dnsZones/TXT@2018-05-01' = {
   parent: dnsZone
   name: '_dnsauth.${subDomain}'
@@ -153,7 +212,23 @@ resource dnsTxtRecord 'Microsoft.Network/dnsZones/TXT@2018-05-01' = {
   }
 }
 
-// CNAME Record (www -> Front Door Endpoint)
+// 2. Apex Validation
+resource apexTxtRecord 'Microsoft.Network/dnsZones/TXT@2018-05-01' = {
+  parent: dnsZone
+  name: '_dnsauth'
+  properties: {
+    TTL: 3600
+    TXTRecords: [
+      {
+        value: [
+          apexCustomDomain.properties.validationProperties.validationToken
+        ]
+      }
+    ]
+  }
+}
+
+// 3. WWW CNAME
 resource dnsCnameRecord 'Microsoft.Network/dnsZones/CNAME@2018-05-01' = {
   parent: dnsZone
   name: subDomain
@@ -165,6 +240,22 @@ resource dnsCnameRecord 'Microsoft.Network/dnsZones/CNAME@2018-05-01' = {
     TTL: 3600
     CNAMERecord: {
       cname: frontDoorEndpoint.properties.hostName
+    }
+  }
+}
+
+// 4. Apex Alias (A Record)
+resource apexARecord 'Microsoft.Network/dnsZones/A@2018-05-01' = {
+  parent: dnsZone
+  name: '@'
+  dependsOn: [
+    frontDoorRoute
+    apexTxtRecord
+  ]
+  properties: {
+    TTL: 3600
+    targetResource: {
+      id: frontDoorEndpoint.id
     }
   }
 }
