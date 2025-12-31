@@ -3,41 +3,28 @@
   hosts: localhost
   connection: local
   gather_facts: false
-  collections:
-    - azure.azcollection
 
   vars:
     resource_group_name: "portfo"
     location: "eastus"
-    storage_account_name: "storage_samueladebodun"
-    bicep_file: "{{ playbook_dir }}/../main.bicep" 
-    json_template_file: "{{ playbook_dir }}/../main.json" 
+    storage_account_name: "storagesamueladebodun"
+    # Points to main.bicep in the project root (one level up from playbooks/)
+    bicep_file: "{{ playbook_dir }}/../main.bicep"
 
   tasks:
-    - name: Compile Bicep to JSON
+    - name: Deploy Infrastructure (Bypass Python Module)
       ansible.builtin.command:
-        cmd: "az bicep build --file {{ bicep_file }} --outfile {{ json_template_file }}"
-
-    - name: Deploy Storage Account using ARM Template
-      azure.azcollection.azure_rm_deployment:
-        state: present
-        resource_group_name: "{{ resource_group_name }}"
-        deployment_name: "ansible-bicep-deploy"
-        location: "{{ location }}"
-        template: "{{ lookup('file', json_template_file) }}"
-        parameters:
-          storageAccountName:
-            value: "{{ storage_account_name }}"
-          location:
-            value: "{{ location }}"
-      register: output
+        cmd: >
+          az deployment group create
+          --resource-group {{ resource_group_name }}
+          --name "ansible-bicep-deploy"
+          --template-file {{ bicep_file }}
+          --parameters storageAccountName={{ storage_account_name }} location={{ location }}
+      register: cli_output
+      changed_when: "'Running' in cli_output.stderr or 'Succeeded' in cli_output.stdout"
 
     - name: Show Deployment Output
       ansible.builtin.debug:
-        msg: "{{ output.deployment.outputs }}"
-
-    # Optional: Clean up the generated JSON file after deployment
-    - name: Remove generated JSON template
-      ansible.builtin.file:
-        path: "{{ json_template_file }}"
-        state: absent
+        msg: "{{ (cli_output.stdout | from_json).properties.outputs | default('No outputs') }}"
+      # Only runs if the previous command returned valid JSON
+      when: cli_output.stdout | length > 0
