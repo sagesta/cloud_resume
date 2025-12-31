@@ -39,7 +39,7 @@ export default {
     }
 
     // Standard Static Site Proxy Logic
-    const AZURE_ORIGIN = env.AZURE_STORAGE_URL;
+    const AZURE_ORIGIN = "https://storagesamueladebodunv2.z19.web.core.windows.net/";
 
     if (!AZURE_ORIGIN) {
       return new Response("Error: AZURE_STORAGE_URL environment variable is not set.", { status: 500 });
