@@ -35,3 +35,6 @@ venv/
 venv_wsl/
 __pycache__/
 *.pyc
+.venv_wsl
+/
+.venv/
