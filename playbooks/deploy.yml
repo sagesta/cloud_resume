@@ -5,9 +5,9 @@
   gather_facts: false
 
   vars:
-    resource_group_name: "portfo-v2"
-    location: "eastus2"
-    storage_account_name: "storagesamueladebodun"
+    resource_group_name: "portfo-central"
+    location: "centralus"
+    storage_account_name: "storagesamueladebodunv2"
     # Points to main.bicep in the project root (one level up from playbooks/)
     bicep_file: "{{ playbook_dir }}/../main.bicep"
 

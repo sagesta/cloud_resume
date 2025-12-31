@@ -5,7 +5,7 @@
   gather_facts: false
 
   vars:
-    resource_group_name: "portfo-v2"
+    resource_group_name: "portfo-central"
     project_root: "{{ playbook_dir }}/.."
     api_dir: "{{ project_root }}/api"
     zip_file: "{{ project_root }}/api.zip"
