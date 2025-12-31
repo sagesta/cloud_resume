@@ -42,29 +42,3 @@
       register: upload_result
       changed_when: upload_result.stdout != ""
 
-    - name: Purge Azure Front Door Cache
-      block:
-        - name: Get Front Door Profile Name
-          ansible.builtin.shell:
-            cmd: az afd profile list --resource-group {{ resource_group_name }} --query "[0].name" -o tsv
-          register: fd_profile_query
-          changed_when: false
-
-        - name: Get Front Door Endpoint Name
-          ansible.builtin.shell:
-            cmd: az afd endpoint list --profile-name {{ fd_profile_query.stdout }} --resource-group {{ resource_group_name }} --query "[0].name" -o tsv
-          register: fd_endpoint_query
-          changed_when: false
-
-        - name: Run Purge Command
-          ansible.builtin.command:
-            cmd: >
-              az afd endpoint purge
-              --resource-group {{ resource_group_name }}
-              --profile-name {{ fd_profile_query.stdout }}
-              --endpoint-name {{ fd_endpoint_query.stdout }}
-              --domains "www.samueladebodun.com" "samueladebodun.com"
-              --content-paths "/*"
-          register: purge_result
-          changed_when: "'Succeeded' in purge_result.stdout"
-      when: upload_result.changed

@@ -8,8 +8,6 @@
     resource_group_name: "portfo"
     location: "eastus"
     storage_account_name: "storagesamueladebodun"
-    dns_zone: "samueladebodun.com"
-    sub_domain: "www"
     # Points to main.bicep in the project root (one level up from playbooks/)
     bicep_file: "{{ playbook_dir }}/../main.bicep"
 
@@ -27,7 +25,7 @@
           --resource-group {{ resource_group_name }}
           --name "ansible-bicep-deploy"
           --template-file {{ bicep_file }}
-          --parameters storageAccountName={{ storage_account_name }} location={{ location }} dnsZoneName={{ dns_zone }} subDomain={{ sub_domain }}
+          --parameters storageAccountName={{ storage_account_name }} location={{ location }}
       register: cli_output
       changed_when: "'Running' in cli_output.stderr or 'Succeeded' in cli_output.stdout"
 
