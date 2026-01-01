@@ -1,28 +1,56 @@
-module.exports = async function (context, req, inputDocument) {
+const { CosmosClient } = require("@azure/cosmos");
+
+module.exports = async function (context, req) {
+    context.log('Starting Manual Cosmos DB Operation...');
+
     try {
-        context.log('JavaScript HTTP trigger function processed a request.');
+        // 1. Get Connection String
+        const connectionString = process.env.CosmosDbConnection;
+        if (!connectionString) {
+            throw new Error("Environment variable 'CosmosDbConnection' is missing.");
+        }
 
-        // Hardcoded for debugging
-        const newCount = 999;
+        // 2. Initialize Client
+        // Note: Check if connectionString specifies credentials or if it is a full string
+        const client = new CosmosClient(connectionString);
 
-        // Output to Cosmos DB to update the count
-        context.bindings.outputDocument = {
-            id: "1",
-            count: newCount
-        };
+        // 3. Get Container Reference
+        const database = client.database("ResumeDB");
+        const container = database.container("Visitors");
 
-        // Response body
+        context.log("Connected to Container: Visitors");
+
+        // 4. Read the Item (ID="1", PartitionKey="1")
+        const itemRef = container.item("1", "1");
+        let { resource: doc } = await itemRef.read();
+
+        // 5. Handle "Not Found" case (Self-Seeding)
+        if (!doc) {
+            context.log("Item '1' not found. Creating it...");
+            const newDoc = { id: "1", count: 1 }; // Start at 1
+            const { resource: created } = await container.items.create(newDoc);
+
+            context.res = { body: { count: created.count } };
+            return;
+        }
+
+        // 6. Increment and Update
+        doc.count = (doc.count || 0) + 1;
+        const { resource: updated } = await itemRef.replace(doc);
+
+        context.log(`Updated count to: ${updated.count}`);
+
         context.res = {
             body: {
-                count: newCount
+                count: updated.count
             }
         };
 
     } catch (error) {
-        context.log.error("Error updating visitor count:", error);
+        context.log.error("Fatal Error:", error);
         context.res = {
             status: 500,
-            body: "Internal Server Error Details: " + error.message + " | Stack: " + error.stack
+            body: "SDK Error: " + error.message + "\nStack: " + error.stack
         };
     }
 };
