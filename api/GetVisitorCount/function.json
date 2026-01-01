@@ -20,7 +20,7 @@
       "direction": "in",
       "name": "inputDocument",
       "databaseName": "ResumeDB",
-      "collectionName": "Visitors",
+      "containerName": "Visitors",
       "connectionStringSetting": "CosmosDbConnection",
       "id": "1",
       "partitionKey": "1"
@@ -30,7 +30,7 @@
       "direction": "out",
       "name": "outputDocument",
       "databaseName": "ResumeDB",
-      "collectionName": "Visitors",
+      "containerName": "Visitors",
       "createIfNotExists": true,
       "connectionStringSetting": "CosmosDbConnection"
     }
