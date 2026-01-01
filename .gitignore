@@ -44,4 +44,6 @@ yarn-error.log
 
 # API Specific
 api/node_modules/
+local.settings.json
+api/local.settings.json
 
