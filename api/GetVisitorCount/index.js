@@ -1,9 +1,15 @@
-const { CosmosClient } = require("@azure/cosmos");
-
 module.exports = async function (context, req) {
     context.log('Starting Manual Cosmos DB Operation...');
 
     try {
+        // Debugging: catch module loading errors
+        let CosmosClient;
+        try {
+            CosmosClient = require("@azure/cosmos").CosmosClient;
+        } catch (err) {
+            throw new Error("Failed to load @azure/cosmos. node_modules likely missing on server. Details: " + err.message);
+        }
+
         // 1. Get Connection String
         const connectionString = process.env.CosmosDbConnection;
         if (!connectionString) {
@@ -11,7 +17,6 @@ module.exports = async function (context, req) {
         }
 
         // 2. Initialize Client
-        // Note: Check if connectionString specifies credentials or if it is a full string
         const client = new CosmosClient(connectionString);
 
         // 3. Get Container Reference
