@@ -22,7 +22,8 @@
       "databaseName": "ResumeDB",
       "collectionName": "Visitors",
       "connectionStringSetting": "CosmosDbConnection",
-      "sqlQuery": "SELECT * FROM c WHERE c.id = '1'"
+      "id": "1",
+      "partitionKey": "1"
     },
     {
       "type": "cosmosDB",

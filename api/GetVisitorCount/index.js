@@ -4,9 +4,9 @@ module.exports = async function (context, req, inputDocument) {
 
         let currentCount = 0;
 
-        // Input is now an array (from sqlQuery)
-        if (inputDocument && inputDocument.length > 0) {
-            currentCount = inputDocument[0].count;
+        // Input is now a single Object (Point Read)
+        if (inputDocument) {
+            currentCount = inputDocument.count;
         }
 
         const newCount = currentCount + 1;
