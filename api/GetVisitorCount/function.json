@@ -31,9 +31,8 @@
       "name": "outputDoc",
       "databaseName": "ResumeDB",
       "collectionName": "Visitors",
-      "createIfNotExists": true,
-      "connectionStringSetting": "CosmosDbConnection",
-      "partitionKey": "1"
+      "createIfNotExists": false,
+      "connectionStringSetting": "CosmosDbConnection"
     }
   ]
 }
