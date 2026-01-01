@@ -31,7 +31,7 @@
       "name": "outputDocument",
       "databaseName": "ResumeDB",
       "collectionName": "Visitors",
-      "createIfNotExists": false,
+      "createIfNotExists": true,
       "connectionStringSetting": "CosmosDbConnection"
     }
   ]
