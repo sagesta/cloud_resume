@@ -1,28 +1,48 @@
 module.exports = async function (context, req) {
-    // 1. Get the current document from the input binding
-    // If the item doesn't exist yet, this will be undefined/null
-    let currentDoc = context.bindings.inputDoc;
+    context.log("Method Started: GetVisitorCount");
 
-    if (!currentDoc) {
-        // If it's missing, initialize it!
-        context.log("Document not found, creating new one...");
-        currentDoc = {
-            id: "1",      // This MUST match the id expected by your partition key
-            count: 0
+    try {
+        // 1. Get the current document from the input binding
+        let currentDoc = context.bindings.inputDoc;
+        context.log("Input Document:", currentDoc ? JSON.stringify(currentDoc) : "NULL (Document not found)");
+
+        if (!currentDoc) {
+            context.log("Document not found, creating new one...");
+            currentDoc = {
+                id: "1",
+                count: 0
+            };
+        }
+
+        // 2. Increment the count
+        currentDoc.count = currentDoc.count + 1;
+        context.log("New Count:", currentDoc.count);
+
+        // 3. Save the updated document back to the database
+        context.bindings.outputDoc = currentDoc;
+        context.log("Assigned to outputDoc binding");
+
+        // 4. Return the count to the user
+        context.res = {
+            status: 200,
+            body: {
+                count: currentDoc.count
+            },
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        };
+        context.log("Response prepared successfully");
+
+    } catch (error) {
+        context.log.error("Fatal Error in GetVisitorCount:", error);
+        context.res = {
+            status: 500,
+            body: {
+                error: "Internal Server Error",
+                details: error.message,
+                stack: error.stack
+            }
         };
     }
-
-    // 2. Increment the count
-    currentDoc.count = currentDoc.count + 1;
-
-    // 3. Save the updated document back to the database (Output Binding)
-    // The name 'outputDoc' must match the "name" in your function.json output binding
-    context.bindings.outputDoc = currentDoc;
-
-    // 4. Return the count to the user
-    context.res = {
-        body: {
-            count: currentDoc.count
-        }
-    };
 }
