@@ -18,7 +18,7 @@
     {
       "type": "cosmosDB",
       "direction": "in",
-      "name": "inputDoc",
+      "name": "inputDocument",
       "databaseName": "ResumeDB",
       "collectionName": "Visitors",
       "connectionStringSetting": "CosmosDbConnection",
@@ -28,7 +28,7 @@
     {
       "type": "cosmosDB",
       "direction": "out",
-      "name": "outputDoc",
+      "name": "outputDocument",
       "databaseName": "ResumeDB",
       "collectionName": "Visitors",
       "createIfNotExists": false,
