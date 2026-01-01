@@ -19,8 +19,8 @@ module.exports = async function (context, req, inputDocument) {
     };
 
     // Output to Cosmos DB to update the count
-    context.bindings.outputDocument = JSON.stringify({
+    context.bindings.outputDocument = {
         id: "1",
         count: newCount
-    });
+    };
 }
