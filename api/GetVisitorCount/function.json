@@ -21,7 +21,6 @@
       "name": "outputDocument",
       "databaseName": "ResumeDB",
       "containerName": "Visitors",
-      "createIfNotExists": true,
       "connectionStringSetting": "CosmosDbConnection"
     }
   ]
