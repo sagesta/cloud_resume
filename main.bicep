@@ -2,6 +2,9 @@
 @maxLength(24)
 param storageAccountName string
 param location string = resourceGroup().location
+param cosmosAccountName string = 'cosmos-account-${uniqueString(resourceGroup().id)}'
+param functionAppName string = 'func-${uniqueString(resourceGroup().id)}'
+param appServicePlanName string = 'plan-${uniqueString(resourceGroup().id)}'
 
 @allowed([
   'Standard_LRS'
@@ -24,14 +27,7 @@ resource stg 'Microsoft.Storage/storageAccounts@2023-01-01' = {
   }
 }
 
-output storageId string = stg.id
-
-
-
-// --- Cosmos DB (Serverless) ---
-param cosmosAccountName string = 'cosmos-${uniqueString(resourceGroup().id)}'
-
-resource cosmosAccount 'Microsoft.DocumentDB/databaseAccounts@2023-11-15' = {
+resource cosmosAccount 'Microsoft.DocumentDB/databaseAccounts@2023-04-15' = {
   name: cosmosAccountName
   location: location
   kind: 'GlobalDocumentDB'
@@ -41,36 +37,27 @@ resource cosmosAccount 'Microsoft.DocumentDB/databaseAccounts@2023-11-15' = {
       {
         locationName: location
         failoverPriority: 0
-        isZoneRedundant: false
       }
     ]
-    capabilities: [
-      {
-        name: 'EnableServerless'
-      }
-    ]
-    consistencyPolicy: {
-      defaultConsistencyLevel: 'Session'
-    }
   }
 }
 
-resource cosmosDb 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases@2023-11-15' = {
+resource cosmosDatabase 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases@2023-04-15' = {
   parent: cosmosAccount
-  name: 'ResumeDB'
+  name: 'cloud_resume'
   properties: {
     resource: {
-      id: 'ResumeDB'
+      id: 'cloud_resume'
     }
   }
 }
 
-resource cosmosContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2023-11-15' = {
-  parent: cosmosDb
-  name: 'Visitors'
+resource cosmosContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2023-04-15' = {
+  parent: cosmosDatabase
+  name: 'visitor_count'
   properties: {
     resource: {
-      id: 'Visitors'
+      id: 'visitor_count'
       partitionKey: {
         paths: [
           '/id'
@@ -81,20 +68,6 @@ resource cosmosContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/con
   }
 }
 
-// --- Azure Function App (Consumption Plan) ---
-param functionAppName string = 'func-${uniqueString(resourceGroup().id)}'
-param appServicePlanName string = 'asp-${uniqueString(resourceGroup().id)}'
-param appInsightsName string = 'ai-${uniqueString(resourceGroup().id)}'
-
-resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
-  name: appInsightsName
-  location: location
-  kind: 'web'
-  properties: {
-    Application_Type: 'web'
-  }
-}
-
 resource appServicePlan 'Microsoft.Web/serverfarms@2022-09-01' = {
   name: appServicePlanName
   location: location
@@ -102,31 +75,23 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2022-09-01' = {
     name: 'Y1'
     tier: 'Dynamic'
   }
-  properties: {}
 }
 
 resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
   name: functionAppName
   location: location
   kind: 'functionapp'
-  identity: {
-    type: 'SystemAssigned'
-  }
   properties: {
     serverFarmId: appServicePlan.id
     siteConfig: {
       appSettings: [
         {
           name: 'AzureWebJobsStorage'
-          value: 'DefaultEndpointsProtocol=https;AccountName=${stg.name};EndpointSuffix=${environment().suffixes.storage};AccountKey=${stg.listKeys().keys[0].value}'
+          value: 'DefaultEndpointsProtocol=https;AccountName=${storageAccountName};AccountKey=${stg.listKeys().keys[0].value}'
         }
         {
-          name: 'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING'
-          value: 'DefaultEndpointsProtocol=https;AccountName=${stg.name};EndpointSuffix=${environment().suffixes.storage};AccountKey=${stg.listKeys().keys[0].value}'
-        }
-        {
-          name: 'WEBSITE_CONTENTSHARE'
-          value: toLower(functionAppName)
+          name: 'WEBSITE_RUN_FROM_PACKAGE'
+          value: '1'
         }
         {
           name: 'FUNCTIONS_EXTENSION_VERSION'
@@ -137,26 +102,13 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
           value: 'node'
         }
         {
-          name: 'WEBSITE_NODE_DEFAULT_VERSION'
-          value: '~20'
-        }
-        {
-          name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
-          value: appInsights.properties.InstrumentationKey
-        }
-        {
-          name: 'CosmosDbConnection'
-          value: cosmosAccount.listConnectionStrings().connectionStrings[0].connectionString
+          name: 'CosmosDbConnectionString'
+          value: 'AccountEndpoint=${cosmosAccount.properties.documentEndpoint};AccountKey=${cosmosAccount.listKeys().primaryMasterKey};'
         }
       ]
-      cors: {
-        allowedOrigins: [
-          '*' // Allow all origins for now (or restrict to Cloudflare Worker URL)
-        ]
-      }
     }
-    httpsOnly: true
   }
 }
 
-output functionAppUrl string = 'https://${functionApp.properties.defaultHostName}'
+output storageId string = stg.id
+output functionAppName_out string = functionApp.name

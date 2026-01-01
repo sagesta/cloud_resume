@@ -66,20 +66,19 @@ Main configuration is located in `src/config.ts`:
 
 ### Visitor Counter Setup (Azure Integration)
 
-The "Visitors" counter in the navbar requires a backend API.
+The "Visitors" counter in the navbar is powered by two Azure Functions (`GetVisitorCount` and `SetVisitorCount`) and a Cosmos DB database. These resources are automatically provisioned when deploying the infrastructure using the Bicep templates in this repository.
 
-1.  **Create an Azure Function**:
-    - Set up an HTTP Trigger function in Azure.
-    - Connect it to a database (Cosmos DB or Table Storage) to increment and retrieve a count.
-    - Ensure it returns JSON: `{ "count": 123 }`.
+The `SetVisitorCount` function is responsible for incrementing the visitor count and returning the updated value. The `GetVisitorCount` function is used to retrieve the current count without incrementing it.
 
-2.  **Environment Variable**:
+To connect the frontend to the API, you need to set the `PUBLIC_VISITOR_API_URL` environment variable to the URL of the `SetVisitorCount` function.
+
+1.  **Environment Variable**:
     - Create a `.env` file in the root directory:
       ```bash
-      PUBLIC_VISITOR_API_URL=https://<your-function-app-name>.azurewebsites.net/api/VisitorCounter
+      PUBLIC_VISITOR_API_URL=https://<your-function-app-name>.azurewebsites.net/api/SetVisitorCount
       ```
 
-3.  **Deployment**:
+2.  **Deployment**:
     - If deploying via GitHub Actions to Azure Static Web Apps, add `PUBLIC_VISITOR_API_URL` as a repository secret.
 
 ### Infrastructure Deployment

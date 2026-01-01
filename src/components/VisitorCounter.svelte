@@ -20,11 +20,14 @@ onMount(async () => {
 	}
 
 	try {
-		const response = await fetch(apiUrl);
+		// First, call the API to increment the count
+		const response = await fetch(apiUrl, { method: "POST" });
+
+		// Then, get the updated count
 		if (response.ok) {
 			const data = await response.json();
-			// Assuming the API returns JSON with a 'count' or 'counter' property, or just the number
-			count = data.count || data.counter || data;
+			// Assuming the API returns JSON with a 'count' property
+			count = data.count;
 		} else {
 			console.error("Failed to fetch visitor count:", response.statusText);
 		}

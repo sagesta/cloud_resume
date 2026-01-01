@@ -1,11 +1,25 @@
 #!/bin/bash
-PROJECT_ROOT=$(dirname "$0")/..
-cd "$PROJECT_ROOT"
+set -e
 
-# Ensure Azure CLI is logged in or available
-if ! command -v az &> /dev/null; then
-    echo "Azure CLI (az) could not be found. Please install it."
+#
+# Deploys the function app code to the function app.
+#
+# USAGE
+#   ./bin/deploy_func <function_app_name>
+#
+# ARGUMENTS
+#   - function_app_name: The name of the function app to deploy to.
+#
+
+# Check if the correct number of arguments were provided.
+if [ "$#" -ne 1 ]; then
+    echo "Usage: ./bin/deploy_func <function_app_name>"
     exit 1
 fi
 
-ansible-playbook playbooks/deploy_function.yml
+# Get the arguments.
+function_app_name=$1
+
+# Deploy the function app code.
+(cd api && npm install && npm run build:production)
+(cd api && func azure functionapp publish "$function_app_name" --javascript)

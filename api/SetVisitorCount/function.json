@@ -18,12 +18,22 @@
     {
       "type": "cosmosDB",
       "direction": "in",
-      "name": "visitorCount",
+      "name": "inputDocument",
       "databaseName": "cloud_resume",
       "collectionName": "visitor_count",
       "connectionStringSetting": "CosmosDbConnectionString",
-      "id": "1",
+      "id" : "1",
       "partitionKey": "1"
+    },
+    {
+      "type": "cosmosDB",
+      "direction": "out",
+      "name": "visitorCount",
+      "databaseName": "cloud_resume",
+      "collectionName": "visitor_count",
+      "createIfNotExists": "true",
+      "connectionStringSetting": "CosmosDbConnectionString"
     }
-  ]
+  ],
+  "scriptFile": "index.js"
 }
