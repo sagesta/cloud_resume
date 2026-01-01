@@ -14,6 +14,26 @@
       "type": "http",
       "direction": "out",
       "name": "res"
+    },
+    {
+      "type": "cosmosDB",
+      "direction": "in",
+      "name": "inputDoc",
+      "databaseName": "ResumeDB",
+      "collectionName": "Visitors",
+      "connectionStringSetting": "CosmosDbConnection",
+      "id": "1",
+      "partitionKey": "1"
+    },
+    {
+      "type": "cosmosDB",
+      "direction": "out",
+      "name": "outputDoc",
+      "databaseName": "ResumeDB",
+      "collectionName": "Visitors",
+      "createIfNotExists": true,
+      "connectionStringSetting": "CosmosDbConnection",
+      "partitionKey": "1"
     }
   ]
 }
