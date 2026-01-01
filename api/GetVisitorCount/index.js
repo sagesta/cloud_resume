@@ -3,8 +3,9 @@ module.exports = async function (context, req, inputDocument) {
 
     let currentCount = 0;
 
-    if (inputDocument) {
-        currentCount = inputDocument.count;
+    // Input is now an array (from sqlQuery)
+    if (inputDocument && inputDocument.length > 0) {
+        currentCount = inputDocument[0].count;
     }
 
     const newCount = currentCount + 1;
