@@ -2,14 +2,8 @@ module.exports = async function (context, req, inputDocument) {
     try {
         context.log('JavaScript HTTP trigger function processed a request.');
 
-        let currentCount = 0;
-
-        // Input is now a single Object (Point Read)
-        if (inputDocument) {
-            currentCount = inputDocument.count;
-        }
-
-        const newCount = currentCount + 1;
+        // Hardcoded for debugging
+        const newCount = 999;
 
         // Output to Cosmos DB to update the count
         context.bindings.outputDocument = {
