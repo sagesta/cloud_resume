@@ -16,26 +16,8 @@ const currentYear = new Date().getFullYear();
         <a class="transition link text-[var(--primary)] font-medium" target="_blank" href="https://astro.build">Astro</a> &
         <a class="transition link text-[var(--primary)] font-medium" target="_blank" href="https://github.com/saicaca/fuwari">Fuwari</a> &
         <a class="transition link text-[var(--primary)] font-medium" target="_blank" href="https://github.com/sagesta">Samuel T. Adebodun</a>
-        <br>
-        <span id="visitor-counter" class="text-xs text-black/50 dark:text-white/50 mt-2">Loading visitors...</span>
+
     </div>
 
-<script>
-    async function updateVisitorCount() {
-        try {
-            const response = await fetch('/api/visitorCount');
-            if (response.ok) {
-                const data = await response.json();
-                const counterElement = document.getElementById('visitor-counter');
-                if (counterElement && data.count) {
-                    counterElement.innerText = `Visitor #${data.count}`;
-                }
-            }
-        } catch (error) {
-            console.error('Failed to fetch visitor count:', error);
-        }
-    }
 
-    updateVisitorCount();
-</script>
 </div>
