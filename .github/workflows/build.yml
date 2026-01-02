@@ -69,7 +69,7 @@ jobs:
         run: pnpm astro build
         env:
           PUBLIC_API_URL: ${{ secrets.PUBLIC_API_URL }}
-          PUBLIC_VISITOR_API_URL: ${{ secrets.PUBLIC_API_URL }}/api/visitorCount
+
 
       - name: Login to Azure
         if: github.ref == 'refs/heads/main'
