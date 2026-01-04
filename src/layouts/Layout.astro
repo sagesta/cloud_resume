@@ -148,7 +148,7 @@ const bannerOffset =
 
 
 	</head>
-	<body class=" min-h-screen transition " class:list={[{"lg:is-home": isHomePage, "enable-banner": enableBanner}]}
+	<body class="min-h-screen transition" class:list={[{"lg:is-home": isHomePage, "enable-banner": enableBanner}]}
 		  data-overlayscrollbars-initialize
 	>
 		<ConfigCarrier></ConfigCarrier>
@@ -166,6 +166,15 @@ const bannerOffset =
 }}>
 @tailwind components;
 @layer components {
+    /* Glassmorphism Utilities */
+    .glass-panel {
+        @apply bg-white/70 dark:bg-[#1a1a1a]/70 backdrop-blur-md border border-white/20 dark:border-white/10 shadow-xl;
+    }
+    
+    .glass-nav {
+         @apply bg-white/80 dark:bg-[#1a1a1a]/80 backdrop-blur-lg border-b border-white/10 shadow-sm transition-colors duration-300;
+    }
+
 	.enable-banner.is-home #banner-wrapper {
 		@apply h-[var(--banner-height-home)] translate-y-[var(--banner-height-extend)]
 	}

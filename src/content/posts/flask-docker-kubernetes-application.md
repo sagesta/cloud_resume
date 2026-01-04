@@ -21,17 +21,19 @@ This repository contains everything needed to deploy a scalable Flask web applic
 
 ## 🏗️ Project Structure
 
-\`flask-app/\
-├── [app.py](http://app.py) # Main Flask application\
-├── Dockerfile # Docker configuration for Flask app\
+```text
+flask-app/
+├── [app.py](http://app.py) # Main Flask application
+├── Dockerfile # Docker configuration for Flask app
 └── requirements.txt # Python dependencies
 
-K8s/\
-├── configmap.yaml # ConfigMap for non-sensitive configuration\
-├── flask-deployment.yaml # Deployment configuration for Flask app\
-├── ingress.yaml # Ingress for external access\
-├── postgres.deployment.yaml# Deployment configuration for Postgres\
-└── secret.yaml # Secret for sensitive configuration\`\[\]
+K8s/
+├── configmap.yaml # ConfigMap for non-sensitive configuration
+├── flask-deployment.yaml # Deployment configuration for Flask app
+├── ingress.yaml # Ingress for external access
+├── postgres.deployment.yaml# Deployment configuration for Postgres
+└── secret.yaml # Secret for sensitive configuration
+```
 
 ## 🔧 Flask Application
 
