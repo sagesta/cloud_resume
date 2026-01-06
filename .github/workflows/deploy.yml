@@ -1,0 +1,101 @@
+name: Deploy Cloud Resume
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  # JOB 1: Deploy Infrastructure (Bicep)
+  deploy-infra:
+    runs-on: ubuntu-latest
+    outputs:
+      function_app_name: ${{ steps.deploy.outputs.functionAppName }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy Bicep
+        id: deploy
+        uses: azure/arm-deploy@v1
+        with:
+          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          resourceGroupName: ${{ secrets.AZURE_RG }}
+          template: ./infra/main.bicep
+          # Pass parameters if needed, or rely on defaults in Bicep
+
+  # JOB 2: Build and Deploy Frontend (Astro)
+  deploy-frontend:
+    needs: deploy-infra
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Astro
+        run: pnpm run build
+        env:
+          # Point this to your Function App URL (we constructed the name in Bicep)
+          # Format: https://<appName-func>.azurewebsites.net/api
+          PUBLIC_API_URL: https://sagesta-resume-func.azurewebsites.net/api
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy to Storage ($web)
+        uses: azure/CLI@v1
+        with:
+          inlineScript: |
+            az storage blob upload-batch --account-name sagestaresumest --auth-mode key -d '$web' -s ./dist --overwrite
+
+  # JOB 3: Deploy Backend (Python Function)
+  deploy-backend:
+    needs: deploy-infra
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install Dependencies
+        shell: bash
+        run: |
+          pushd './api'
+          pip install -r requirements.txt --target=".python_packages/lib/site-packages"
+          popd
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy Function App
+        uses: Azure/functions-action@v1
+        with:
+          app-name: sagesta-resume-func # Must match Bicep output name
+          package: './api'
