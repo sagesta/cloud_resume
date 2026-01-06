@@ -1,12 +1,17 @@
-param location string = resourceGroup().location
-param appName string = 'sagesta-resume' // Change this to be unique!
+// Default to 'eastus2' which usually has better availability for Student/Free tiers
+param location string = 'eastus2' 
+param appName string = 'sagesta-resume'
 
-// 1. Storage Account for Static Website
+// 1. Create a clean variable for Storage (Remove dashes, lowercase only)
+// uniqueString uses the Resource Group ID to ensure this name is unique globally
+var storageName = 'st${replace(appName, '-', '')}${uniqueString(resourceGroup().id)}'
+
+// 2. Storage Account
 resource storage 'Microsoft.Storage/storageAccounts@2022-09-01' = {
-  name: '${appName}st'
+  name: take(storageName, 24) // Ensure it doesn't exceed 24 chars
   location: location
   sku: {
-    name: 'Standard_LRS' // Cheapest redundancy
+    name: 'Standard_LRS'
   }
   kind: 'StorageV2'
   properties: {
@@ -14,14 +19,13 @@ resource storage 'Microsoft.Storage/storageAccounts@2022-09-01' = {
   }
 }
 
-// Enable Static Website (This is a sub-resource trick in Bicep)
 resource blobService 'Microsoft.Storage/storageAccounts/blobServices@2022-09-01' = {
   parent: storage
   name: 'default'
   properties: {}
 }
 
-// 2. Cosmos DB (Serverless for cost efficiency or Free Tier)
+// 3. Cosmos DB
 resource cosmosAccount 'Microsoft.DocumentDB/databaseAccounts@2023-04-15' = {
   name: '${appName}-db'
   location: location
@@ -34,10 +38,9 @@ resource cosmosAccount 'Microsoft.DocumentDB/databaseAccounts@2023-04-15' = {
         failoverPriority: 0
       }
     ]
-    // "EnableFreeTier": true // Uncomment if you haven't used your 1 free tier yet!
     capabilities: [
       {
-        name: 'EnableServerless' // Pay only for what you use (very cheap for resumes)
+        name: 'EnableServerless'
       }
     ]
   }
@@ -67,13 +70,13 @@ resource container 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/container
   }
 }
 
-// 3. Azure Function (Python)
+// 4. Azure Function
 resource hostingPlan 'Microsoft.Web/serverfarms@2022-09-01' = {
   name: '${appName}-plan'
   location: location
   sku: {
     name: 'Y1' 
-    tier: 'Dynamic' // Consumption plan (Pay-as-you-go, usually free for low traffic)
+    tier: 'Dynamic'
   }
   properties: {}
 }
@@ -81,11 +84,11 @@ resource hostingPlan 'Microsoft.Web/serverfarms@2022-09-01' = {
 resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
   name: '${appName}-func'
   location: location
-  kind: 'functionapp,linux' // Linux is required for Python
+  kind: 'functionapp,linux'
   properties: {
     serverFarmId: hostingPlan.id
     siteConfig: {
-      linuxFxVersion: 'PYTHON|3.11' // Ensure matches your local python version
+      linuxFxVersion: 'PYTHON|3.11'
       appSettings: [
         {
           name: 'AzureWebJobsStorage'
@@ -106,8 +109,8 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
       ]
       cors: {
         allowedOrigins: [
-          'https://samueladebodun.com' // Replace with your actual domain later
-          'http://localhost:4321'   // For local testing
+          'https://samueladebodun.com' 
+          'http://localhost:4321'
         ]
       }
     }
@@ -115,6 +118,7 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
   }
 }
 
-// Outputs to help us later
 output storageEndpoint string = storage.properties.primaryEndpoints.web
 output functionAppName string = functionApp.name
+// Important: Output the generated storage name so we can use it in GitHub Actions
+output storageAccountName string = storage.name

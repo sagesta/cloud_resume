@@ -10,13 +10,16 @@ permissions:
   contents: read
 
 jobs:
+  # --------------------------------------------------------------------------
   # JOB 1: Deploy Infrastructure (Bicep)
+  # --------------------------------------------------------------------------
   deploy-infra:
     runs-on: ubuntu-latest
     outputs:
       function_app_name: ${{ steps.deploy.outputs.functionAppName }}
+      storage_account_name: ${{ steps.deploy.outputs.storageAccountName }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Azure Login
         uses: azure/login@v1
@@ -29,35 +32,37 @@ jobs:
         with:
           subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           resourceGroupName: ${{ secrets.AZURE_RG }}
-          template: ./main.bicep
-          # Pass parameters if needed, or rely on defaults in Bicep
+          template: ./infra/main.bicep
+          # Override the location to centralus here
+          parameters: location=eastus
 
-  # JOB 2: Build and Deploy Frontend (Astro)
+  # --------------------------------------------------------------------------
+  # JOB 2: Build and Deploy Frontend (Astro -> Azure Storage)
+  # --------------------------------------------------------------------------
   deploy-frontend:
     needs: deploy-infra
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
         with:
-          version: 8
+          version: 9
 
-      - name: Install Dependencies
+      - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Build Astro
         run: pnpm run build
         env:
-          # Point this to your Function App URL (we constructed the name in Bicep)
-          # Format: https://<appName-func>.azurewebsites.net/api
-          PUBLIC_API_URL: https://sagesta-resume-func.azurewebsites.net/api
+          # Construct the API URL using the function app name output from Job 1
+          PUBLIC_API_URL: https://${{ needs.deploy-infra.outputs.function_app_name }}.azurewebsites.net/api
 
       - name: Azure Login
         uses: azure/login@v1
@@ -67,15 +72,23 @@ jobs:
       - name: Deploy to Storage ($web)
         uses: azure/CLI@v1
         with:
+          # Use the dynamic storage account name output from Job 1
           inlineScript: |
-            az storage blob upload-batch --account-name sagestaresumest --auth-mode key -d '$web' -s ./dist --overwrite
+            az storage blob upload-batch \
+              --account-name ${{ needs.deploy-infra.outputs.storage_account_name }} \
+              --auth-mode key \
+              -d '$web' \
+              -s ./dist \
+              --overwrite
 
-  # JOB 3: Deploy Backend (Python Function)
+  # --------------------------------------------------------------------------
+  # JOB 3: Deploy Backend (Python -> Azure Functions)
+  # --------------------------------------------------------------------------
   deploy-backend:
     needs: deploy-infra
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       
       - name: Setup Python
         uses: actions/setup-python@v4
@@ -97,5 +110,5 @@ jobs:
       - name: Deploy Function App
         uses: Azure/functions-action@v1
         with:
-          app-name: sagesta-resume-func # Must match Bicep output name
+          app-name: ${{ needs.deploy-infra.outputs.function_app_name }}
           package: './api'
