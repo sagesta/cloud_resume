@@ -70,6 +70,20 @@ resource container 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/container
   }
 }
 
+resource likesContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2023-04-15' = {
+  parent: database
+  name: 'Likes'
+  properties: {
+    resource: {
+      id: 'Likes'
+      partitionKey: {
+        paths: ['/id']
+        kind: 'Hash'
+      }
+    }
+  }
+}
+
 // 4. Azure Function
 resource hostingPlan 'Microsoft.Web/serverfarms@2022-09-01' = {
   name: '${appName}-plan'
