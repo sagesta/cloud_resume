@@ -34,7 +34,7 @@ jobs:
           resourceGroupName: ${{ secrets.AZURE_RG }}
           template: ./infra/main.bicep
           # Override the location to centralus here
-          parameters: location=eastus
+          parameters: location=centralus
 
   # --------------------------------------------------------------------------
   # JOB 2: Build and Deploy Frontend (Astro -> Azure Storage)
