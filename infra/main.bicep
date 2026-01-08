@@ -27,8 +27,8 @@ resource blobService 'Microsoft.Storage/storageAccounts/blobServices@2022-09-01'
 
 // 3. Cosmos DB
 resource cosmosAccount 'Microsoft.DocumentDB/databaseAccounts@2023-04-15' = {
-  name: '${appName}-db'
-  location: location
+  name: '${appName}-db-${uniqueString(resourceGroup().id)}' 
+  location: locatio
   kind: 'GlobalDocumentDB'
   properties: {
     databaseAccountOfferType: 'Standard'
