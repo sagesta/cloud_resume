@@ -125,7 +125,8 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
       ]
       cors: {
         allowedOrigins: [
-          'https://samueladebodun.com' 
+          'https://samueladebodun.com'
+          'https://www.samueladebodun.com'
           'http://localhost:4321'
         ]
       }
