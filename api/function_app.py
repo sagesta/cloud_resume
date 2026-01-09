@@ -4,7 +4,45 @@ import os
 import json
 import logging
 
+
 app = func.FunctionApp()
+
+@app.route(route="health", auth_level=func.AuthLevel.ANONYMOUS)
+def health(req: func.HttpRequest) -> func.HttpResponse:
+    """Diagnostic endpoint to check Cosmos DB connectivity"""
+    try:
+        connection_string = os.environ.get('CosmosDbConnectionString')
+        if not connection_string:
+            return func.HttpResponse(
+                json.dumps({"status": "error", "message": "CosmosDbConnectionString not set"}),
+                status_code=500,
+                mimetype="application/json"
+            )
+        
+        client = cosmos_client.CosmosClient.from_connection_string(connection_string)
+        database = client.get_database_client("ResumeDB")
+        
+        # Check if containers exist
+        containers = list(database.list_containers())
+        container_names = [c['id'] for c in containers]
+        
+        return func.HttpResponse(
+            json.dumps({
+                "status": "ok",
+                "database": "ResumeDB",
+                "containers": container_names,
+                "connection": "successful"
+            }),
+            status_code=200,
+            mimetype="application/json"
+        )
+    except Exception as e:
+        return func.HttpResponse(
+            json.dumps({"status": "error", "message": str(e), "type": type(e).__name__}),
+            status_code=500,
+            mimetype="application/json"
+        )
+
 
 @app.route(route="visitor_count", auth_level=func.AuthLevel.ANONYMOUS)
 def visitor_count(req: func.HttpRequest) -> func.HttpResponse:
