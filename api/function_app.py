@@ -56,7 +56,7 @@ def visitor_count(req: func.HttpRequest) -> func.HttpResponse:
 
         client = cosmos_client.CosmosClient.from_connection_string(connection_string)
         database = client.get_database_client("ResumeDB")
-        container = client.get_container_client("Counter")
+        container = database.get_container_client("Counter")
 
         # 2. Define the item ID (single counter)
         item_id = "visitor-count"
@@ -101,7 +101,7 @@ def likes(req: func.HttpRequest) -> func.HttpResponse:
 
         client = cosmos_client.CosmosClient.from_connection_string(connection_string)
         database = client.get_database_client("ResumeDB")
-        container = client.get_container_client("Likes")
+        container = database.get_container_client("Likes")
 
         # 2. Get the item ID from query params
         item_id = req.params.get('id')
