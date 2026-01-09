@@ -18,7 +18,7 @@ const recentPosts = allBlogPosts.slice(0, 3); // Show top 3 recent posts
     <!-- Recent Posts Logic - Reusing PostCard if available or creating a simple list -->
     <div class="grid grid-cols-1 md:grid-cols-1 gap-4 transition-fade">
         {recentPosts.map((entry) => (
-             <PostCard entry={entry} title={entry.data.title} tags={entry.data.tags} category={entry.data.category} published={entry.data.published} url={entry.slug} image={entry.data.image} description={entry.data.description} draft={entry.data.draft} class="onload-animation" style={`animation-delay: calc(var(--content-delay) + 50ms)`}></PostCard>
+             <PostCard entry={entry} title={entry.data.title} tags={entry.data.tags} category={entry.data.category} published={entry.data.published} url={`/posts/${entry.slug}/`} image={entry.data.image} description={entry.data.description} draft={entry.data.draft} class="onload-animation" style={`animation-delay: calc(var(--content-delay) + 50ms)`}></PostCard>
         ))}
     </div>
     
