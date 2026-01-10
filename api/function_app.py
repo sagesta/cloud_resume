@@ -49,6 +49,10 @@ def visitor_count(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Processing visitor count request.')
 
     try:
+        # Check if this is a read-only request
+        increment_param = req.params.get('increment', 'true').lower()
+        should_increment = increment_param != 'false'
+
         # 1. Connect to Cosmos DB
         connection_string = os.environ.get('CosmosDbConnectionString')
         if not connection_string:
@@ -65,15 +69,22 @@ def visitor_count(req: func.HttpRequest) -> func.HttpResponse:
         # 3. Try to read the item
         try:
             item = container.read_item(item=item_id, partition_key=partition_key)
-            # 4. Increment
-            item['count'] += 1
-            container.upsert_item(item)
+            
+            if should_increment:
+                # 4. Increment
+                item['count'] += 1
+                container.upsert_item(item)
+            
             count = item['count']
         except Exception:
-            # 5. If item doesn't exist, create it
-            item = {'id': item_id, 'count': 1}
-            container.create_item(item)
-            count = 1
+            if should_increment:
+                # 5. If item doesn't exist, create it
+                item = {'id': item_id, 'count': 1}
+                container.create_item(item)
+                count = 1
+            else:
+                # If read-only and item doesn't exist, return 0
+                count = 0
 
         return func.HttpResponse(
             json.dumps({"count": count}),
