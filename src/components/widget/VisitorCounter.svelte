@@ -20,17 +20,20 @@
         now - parseInt(lastVisit, 10) > COOLDOWN_HOURS * 60 * 60 * 1000;
 
       if (shouldIncrement) {
-        // Increment counter via API
-        await fetch(`${API_URL}/visitor_count`);
+        // Call API once - it will increment AND return the new count
+        const response = await fetch(`${API_URL}/visitor_count`);
+        if (response.ok) {
+          const data = await response.json();
+          count = data.count || 0;
+          // Store the count in localStorage for display when we don't increment
+          localStorage.setItem("portfolio_visitor_count", count.toString());
+        }
         // Update last visit time
         localStorage.setItem("portfolio_last_visit", now.toString());
-      }
-
-      // Always fetch and display current count
-      const response = await fetch(`${API_URL}/visitor_count`);
-      if (response.ok) {
-        const data = await response.json();
-        count = data.count || 0;
+      } else {
+        // Don't call API - just show the cached count to avoid incrementing
+        const cachedCount = localStorage.getItem("portfolio_visitor_count");
+        count = cachedCount ? parseInt(cachedCount, 10) : 0;
       }
     } catch (e) {
       console.error("Failed to fetch visitor count", e);
