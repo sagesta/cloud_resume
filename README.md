@@ -1,122 +1,135 @@
-# Cloud Resume & Portfolio ☁️
+# Cloud Resume & Portfolio
 
-A modern, high-performance cloud resume and portfolio website built with [Astro](https://astro.build) and [Svelte](https://svelte.dev), using the [Fuwari](https://github.com/saicaca/fuwari) theme.
+A modern cloud-native resume and portfolio website showcasing DevOps and Cloud Engineering expertise.
 
-This project showcases professional skills, experience, and certifications in a responsive, aesthetically pleasing interface with dynamic features like a live visitor counter.
+**Live Site**: [samueladebodun.com](https://samueladebodun.com)
 
-![Home Page](/public/assets/images/hero-bg.png)
+![Cloud Resume Architecture](public/assets/images/hero-bg.png)
 
-## ✨ Key Features
+## Overview
 
-- **Custom Landing Page**: Features a "Monet-style" artistic hero section with a welcome message and featured activity.
-- **Dedicated Profile Sections**:
-  - **Skills (`/skills/`)**: A dedicated page displaying technical skills and a 2-column grid of official certification logos (Azure, Kubernetes) with verification links.
-  - **Experience (`/experience/`)**: A clean timeline of professional history.
-  - **Projects (`/archive/`)**: A portfolio section to showcase projects (formerly "Archive").
-- **Dynamic Visitor Counter**: Integrated Azure Function API to track and display live site visits in the navigation bar.
-- **Modern UI/UX**:
-  - Clean "Blue" theme (Hue 260).
-  - Dark/Light mode support.
-  - Responsive design for mobile and desktop.
-  - Interactive hover effects and smooth transitions.
+This project demonstrates cloud architecture best practices through a fully automated, serverless portfolio website. Built with modern web technologies and deployed on Azure, it features real-time visitor tracking, automated CI/CD, and infrastructure as code.
 
-## 🛠️ Architecture
+## Tech Stack
 
-- **Frontend**: Astro (Static Site Generation with Islands Architecture for interactivity).
-- **Styling**: Tailwind CSS + Stylus.
-- **Interactivity**: Svelte components (Visitor Counter, Theme Switcher).
-- **Backend**: Azure Functions (HTTP Trigger) + Azure Cosmos DB/Table Storage (for visitor counting).
-- **Content**: Markdown-based content management for blog posts and portfolio items.
+**Frontend**
+- Astro (Static Site Generation)
+- Svelte (Interactive Components)
+- Tailwind CSS (Styling)
 
-## 🚀 Getting Started
+**Backend**
+- Azure Functions (Serverless API)
+- Azure Cosmos DB (NoSQL Database)
+- Python (Backend Logic)
+
+**Infrastructure**
+- Azure Static Web Apps (Hosting)
+- Cloudflare (CDN, DNS, Security)
+- Bicep (Infrastructure as Code)
+- GitHub Actions (CI/CD)
+
+## Key Features
+
+- ✅ **Real-time Visitor Counter** - Azure Functions + Cosmos DB integration
+- ✅ **Dark/Light Mode** - Responsive theme switching
+- ✅ **Blog & Projects** - Markdown-based content management
+- ✅ **Automated Deployment** - GitHub Actions CI/CD pipeline
+- ✅ **Infrastructure as Code** - Bicep templates for Azure resources
+
+## Quick Start
 
 ### Prerequisites
-
-- Node.js (v18+)
-- pnpm (v9+)
+- Node.js 18+
+- pnpm 9+
 
 ### Installation
 
-1.  Clone the repository:
-    ```bash
-    git clone https://github.com/yourusername/cloud-resume.git
-    cd cloud-resume
-    ```
+```bash
+# Clone repository
+git clone https://github.com/yourusername/cloud-resume.git
+cd cloud-resume
 
-2.  Install dependencies:
-    ```bash
-    pnpm install
-    ```
+# Install dependencies
+pnpm install
 
-3.  Start the development server:
-    ```bash
-    pnpm dev
-    ```
+# Start development server
+pnpm dev
+```
 
-The site will be available at `samueladebodun.com`.
+Visit `http://localhost:4321`
 
-## ⚙️ Configuration
+## Configuration
 
-### Site Config
-Main configuration is located in `src/config.ts`:
-- **Site Title & Subtitle**: "Samuel T. Adebodun - Cloud & DevOps Engineer"
-- **Navigation Links**: Customize the navbar menu.
-- **Social Links**: Update GitHub, LinkedIn, and Mail links.
-- **Theme Color**: Adjust `themeColor.hue` (current: 260).
+### Environment Variables
 
-### Visitor Counter Setup (Azure Integration)
+Create a `.env` file:
 
-The "Visitors" counter in the navbar is powered by two Azure Functions (`GetVisitorCount` and `SetVisitorCount`) and a Cosmos DB database. These resources are automatically provisioned when deploying the infrastructure using the Bicep templates in this repository.
+```bash
+PUBLIC_VISITOR_API_URL=https://your-function-app.azurewebsites.net/api/visitor_count
+```
 
-The `SetVisitorCount` function is responsible for incrementing the visitor count and returning the updated value. The `GetVisitorCount` function is used to retrieve the current count without incrementing it.
+### Site Settings
 
-To connect the frontend to the API, you need to set the `PUBLIC_VISITOR_API_URL` environment variable to the URL of the `SetVisitorCount` function.
+Edit `src/config.ts` to customize:
+- Site title and metadata
+- Navigation links
+- Social media links
+- Theme colors
 
-1.  **Environment Variable**:
-    - Create a `.env` file in the root directory:
-      ```bash
-      PUBLIC_VISITOR_API_URL=https://<your-function-app-name>.azurewebsites.net/api/SetVisitorCount
-      ```
+## Deployment
 
-2.  **Deployment**:
-    - If deploying via GitHub Actions to Azure Static Web Apps, add `PUBLIC_VISITOR_API_URL` as a repository secret.
+### Azure Infrastructure
 
-### Infrastructure Deployment
+Deploy Azure resources using Bicep:
 
-The project includes Infrastructure as Code (IaC) using Bicep and Ansible to provision Azure resources (Storage Account).
+```bash
+# Install dependencies
+pip install -r requirements.txt
+ansible-galaxy collection install azure.azcollection
 
-1.  **Install Python Dependencies**:
-    ```bash
-    pip install -r requirements.txt
-    ```
+# Deploy infrastructure
+./bin/deploy
+```
 
-2.  **Install Ansible Galaxy Collection**:
-    ```bash
-    ansible-galaxy collection install azure.azcollection
-    ```
+### GitHub Actions
 
-3.  **Run Deployment Script**:
-    ```bash
-    ./bin/deploy
-    ```
-    This script will compile the Bicep template and deploy the Storage Account to the configured Azure resource group.
+The project includes automated CI/CD:
+1. Push to `main` branch
+2. GitHub Actions builds the site
+3. Deploys to Azure Static Web Apps
+4. Cloudflare caches and serves content
 
-## 📂 Project Structure
+## Project Structure
 
 ```
-/
-├── public/             # Static assets (images, fonts)
+cloud-resume/
 ├── src/
-│   ├── components/     # Astro and Svelte components (Navbar, Hero, VisitorCounter)
-│   ├── content/        # Markdown content (posts, spec/skills, spec/experience)
-│   ├── layouts/        # Page layouts (MainGridLayout)
-│   ├── pages/          # Route definitions (index, skills, experience, posts)
-│   ├── types/          # TypeScript definitions
-│   └── config.ts       # Main site configuration
-├── astro.config.mjs    # Astro configuration
-└── tailwind.config.cjs # Tailwind configuration
+│   ├── components/      # Reusable UI components
+│   ├── content/         # Markdown content (posts, skills, experience)
+│   ├── layouts/         # Page layouts
+│   ├── pages/           # Route definitions
+│   └── config.ts        # Site configuration
+├── infra/               # Bicep templates
+├── api/                 # Azure Functions
+└── public/              # Static assets
 ```
 
-## 📄 License
+## Architecture
 
-This project is licensed under the [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) license.
+```
+User → Cloudflare (CDN) → Azure Static Web Apps (Frontend)
+                              ↓
+                        Azure Functions (API)
+                              ↓
+                        Cosmos DB (Database)
+```
+
+## License
+
+[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/)
+
+---
+
+**Author**: Samuel T. Adebodun  
+**Role**: Cloud & DevOps Engineer  
+**Contact**: [LinkedIn](https://linkedin.com/in/yourprofile) | [GitHub](https://github.com/yourusername)
