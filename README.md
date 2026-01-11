@@ -4,7 +4,7 @@ A modern cloud-native resume and portfolio website showcasing DevOps and Cloud E
 
 **Live Site**: [samueladebodun.com](https://samueladebodun.com)
 
-![Cloud Resume Architecture](public/assets/images/hero-bg.png)
+![Cloud Resume Architecture](public/assets/images/posts/whatsapp_image_2026_01_11_at_11.20.59_am.jpeg)
 
 ## Overview
 
@@ -132,4 +132,4 @@ User → Cloudflare (CDN) → Azure Static Web Apps (Frontend)
 
 **Author**: Samuel T. Adebodun  
 **Role**: Cloud & DevOps Engineer  
-**Contact**: [LinkedIn](https://linkedin.com/in/yourprofile) | [GitHub](https://github.com/yourusername)
+**Contact**: [LinkedIn](https://linkedin.com/in/samuel-tomolaadebodun) | [GitHub](https://github.com/sagesta)
