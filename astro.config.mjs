@@ -4,6 +4,7 @@ import tailwind from "@astrojs/tailwind";
 import { pluginCollapsibleSections } from "@expressive-code/plugin-collapsible-sections";
 import { pluginLineNumbers } from "@expressive-code/plugin-line-numbers";
 import swup from "@swup/astro";
+import sitemap from "@astrojs/sitemap";
 import expressiveCode from "astro-expressive-code";
 import icon from "astro-icon";
 import { defineConfig } from "astro/config";
@@ -47,6 +48,7 @@ export default defineConfig({
 			updateBodyClass: false,
 			globalInstance: true,
 		}),
+		sitemap(),
 		icon({
 			include: {
 				"preprocess: vitePreprocess(),": ["*"],
