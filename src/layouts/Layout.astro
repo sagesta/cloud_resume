@@ -63,7 +63,7 @@ if (!lang) {
 }
 const siteLang = lang.replace("_", "-");
 
-const imagePath = banner || profileConfig.avatar;
+const imagePath = banner || profileConfig.avatar || "";
 const ogImage = new URL(imagePath, Astro.site).href;
 
 const bannerOffsetByPosition = {
