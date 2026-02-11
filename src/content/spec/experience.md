@@ -17,9 +17,9 @@ December 2023 - April 2025
 - Configured and supported network infrastructure, facilitating reliable data transmission from nationwide weather stations to central processing facilities
 - Troubleshot mission-critical systems, minimising downtime and ensuring accurate weather data flow.
 
-**Information Technology Support Engineer at Olakonet - Kano State, Nigeria**
+**Information Technology Support Engineer at Stabim Innovatives Limited - FCT, Nigeria**
 
-November 2022 - October 2023
+November 2022 - October 2025
 
 - Provided technical support for fintech platforms, ensuring seamless operation of digital payment systems
 - Resolved payment processing issues and transaction disputes, enhancing customer satisfaction and trust.
