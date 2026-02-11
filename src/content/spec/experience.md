@@ -17,7 +17,7 @@ December 2023 - April 2025
 - Configured and supported network infrastructure, facilitating reliable data transmission from nationwide weather stations to central processing facilities
 - Troubleshot mission-critical systems, minimising downtime and ensuring accurate weather data flow.
 
-**Information Technology Support Engineer at Stabim Innovatives Limited - FCT, Nigeria**
+**Information Technology Support Engineer at [Stabim Innovatives Limited](https://stabiminnovatives.com/)**
 
 November 2022 - October 2025
 
